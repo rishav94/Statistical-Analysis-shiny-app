@@ -1,6 +1,7 @@
 
 library(shiny)
 library(pdfetch)
+library(ggplot2)
 # Define server logic required to draw a histogram
 shinyServer(function(input, output,session) {
   # reading data set for prob tab
@@ -24,34 +25,35 @@ shinyServer(function(input, output,session) {
               Extdatax<-File_Data()
                DT::datatable(Extdatax,options=list(lengthChange= TRUE))
                              }) #render datatable 
-    # pd<-na.omit(File_Data) 
-    # output$prob <- renderPrint({ 
-    # 
-    #         print(paste('Selected Column :',input$columns)) 
-    #   
-    #   
-    #   px <- pd[,input$columns] 
     
-       output$des<-reactive({df<-File_Data()
-       clm<-df[,input$column]
-     mean(clm)
-      
-       })
-       output$graph <- renderPlot({ 
-        #  print(paste('Selected Column :',input$column)) 
-        # 
-        # df <- File_Data() 
-        # 
-        # clm <- df[,input$column] 
+    # calculate mean of selected column
+       output$des<-reactive({
         
+         df<-na.omit(File_Data())
+         clm<-df[,input$column]
+          mean(clm)
+      
+       }) #des
+       
+       #summary of column data
+       output$sum<-renderPrint({df<-na.omit(File_Data()) 
+       clm<-df[,input$column]
+       summary(clm)
+       })
+        output$box<- renderPlot({df<-na.omit(File_Data())
+        clm<-df[,input$column]
+        boxplot(clm)})
+       #
+       output$graph <- renderPlot({ 
+       
                        
        if( input$Prob_model=='normal')
            {
              par(mfrow=c(1,2))  
              
-             x=seq(-input$i,input$i,0.01)  
+             x=seq(-input$j1,input$j1,0.01)  
              
-             plot(x,dnorm(input$j1,input$mu,input$sigma),type='l', col='red',ylab="")  
+             plot(x,dnorm(x,input$mu,input$sigma),type='l', col='red',ylab="")  
             
            }
        
@@ -59,7 +61,7 @@ shinyServer(function(input, output,session) {
             {
               par(mfrow=c(1,2)) 
               
-              x=seq(0,input$i,0.01)  
+              x=seq(0,input$j2,0.01)  
               
               plot(x,dexp(x,input$lam),type='l',col='green')
             }
@@ -127,7 +129,7 @@ shinyServer(function(input, output,session) {
           } 
      
        }) 
-       
+      
    #reading data set for hypotheses test
     File_Data2<-reactive({
       file2<- input$Hypothesis_Data
